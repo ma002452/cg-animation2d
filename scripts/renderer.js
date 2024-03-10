@@ -33,8 +33,14 @@ class Renderer {
         //
 
         // slide1
-        let Vx_1_0 = 100;
-        let Vy_1_0 = 100;
+        let translate = new Matrix(3, 3);
+        let rotate = new Matrix(3, 3);
+
+        let translate1 = new Matrix(3, 3);
+        let rotate1 = new Matrix(3, 3);
+
+        let translate2 = new Matrix(3, 3);
+        let rotate2 = new Matrix(3, 3);
         //
 
         this.models = {
@@ -56,12 +62,62 @@ class Renderer {
                         CG.Vector3(200, 100, 1)
                     ],
                     center: CG.Vector3(200, 200, 1),
-                    velocity: [Vx_1_0, Vy_1_0, 1],
-                    theta: Math.PI/4,
-                    transform: new Matrix(3, 3)
+                    verticesAtOrigin: [
+                        CG.Vector3(100, 0, 1),
+                        CG.Vector3(0, 100, 1),
+                        CG.Vector3(-100, 0, 1),
+                        CG.Vector3(0, -100, 1)
+                    ],
+                    velocity: [100, 100, 1],
+                    translate: translate,
+                    rotate: rotate,
+                    theta: Math.PI/100,
+                    transform: Matrix.multiply([translate, rotate])
+                },
+                {
+                    vertices: [
+                        CG.Vector3(700, 600, 1),
+                        CG.Vector3(600, 700, 1),
+                        CG.Vector3(500, 600, 1),
+                        CG.Vector3(550, 500, 1),
+                        CG.Vector3(650, 500, 1)
+                    ],
+                    center: CG.Vector3(400, 450, 1),
+                    verticesAtOrigin: [
+                        CG.Vector3(100, 0, 1),
+                        CG.Vector3(0, 100, 1),
+                        CG.Vector3(-100, 0, 1),
+                        CG.Vector3(-50, -100, 1),
+                        CG.Vector3(50, -100, 1)
+                    ],
+                    velocity: [100, 100, 1],
+                    translate1: translate1,
+                    rotate1: rotate1,
+                    theta: -Math.PI/20,
+                    transform: Matrix.multiply([translate1, rotate1])
+                },
+                {
+                    vertices: [
+                        CG.Vector3(800, 300, 1),
+                        CG.Vector3(700, 500, 1),
+                        CG.Vector3(600, 300, 1)
+                    ],
+                    center: CG.Vector3(650, 200, 1),
+                    verticesAtOrigin: [
+                        CG.Vector3(100, -100, 1),
+                        CG.Vector3(0, 100, 1),
+                        CG.Vector3(-100, -100, 1)
+                    ],
+                    velocity: [70, 70, 1],
+                    translate2: translate2,
+                    rotate2: rotate2,
+                    theta: Math.PI/2,
+                    transform: Matrix.multiply([translate2, rotate2])
                 }
             ],
-            slide2: [],
+            slide2: [
+
+            ],
             slide3: []
         };
     }
@@ -127,18 +183,26 @@ class Renderer {
         CG.mat3x3Translate(this.models.slide0[0].transform, tx_0, ty_0);
         console.log(this.models.slide0[0].transform);
 
-        // slide1 (translate * rotate * translate)
-        let tx_1_0 = this.models.slide1[0].transform.values[0][2] + this.models.slide1[0].velocity[0] * delta_time/1000;
-        let ty_1_0 = this.models.slide1[0].transform.values[1][2] + this.models.slide1[0].velocity[1] * delta_time/1000;
-        CG.mat3x3Translate(this.models.slide1[0].transform, tx_1_0, ty_1_0);
-        let translate1 = this.models.slide1[0].transform
-        
-        CG.mat3x3Rotate(this.models.slide1[0].transform, this.models.slide1[0].theta);
-        let rotate = this.models.slide1[0].transform;
 
 
+        // slide1
+        // rotate
+        CG.mat3x3Rotate(this.models.slide1[0].rotate, this.models.slide1[0].theta);
+        // translate to the desired location
+        let tx_1 = this.models.slide1[0].center.values[0][0] + this.models.slide1[0].velocity[0] * delta_time/1000;
+        let ty_1 = this.models.slide1[0].center.values[1][0] + this.models.slide1[0].velocity[1] * delta_time/1000;
+        CG.mat3x3Translate(this.models.slide1[0].translate, tx_1, ty_1);
 
-        console.log(this.models.slide1[0].transform);
+        CG.mat3x3Rotate(this.models.slide1[1].rotate1, this.models.slide1[1].theta);
+        let tx_2 = this.models.slide1[1].center.values[0][0] + this.models.slide1[1].velocity[0] * delta_time/1000;
+        let ty_2 = this.models.slide1[1].center.values[1][0] + this.models.slide1[1].velocity[1] * delta_time/1000;
+        CG.mat3x3Translate(this.models.slide1[1].translate1, tx_2, ty_2);
+
+        CG.mat3x3Rotate(this.models.slide1[2].rotate2, this.models.slide1[2].theta);
+        let tx_3 = this.models.slide1[2].center.values[0][0] + this.models.slide1[2].velocity[0] * delta_time/1000;
+        let ty_3 = this.models.slide1[2].center.values[1][0] + this.models.slide1[2].velocity[1] * delta_time/1000;
+        CG.mat3x3Translate(this.models.slide1[2].translate2, tx_3, ty_3);
+
     }
     
     //
@@ -204,25 +268,60 @@ class Renderer {
         // TODO: draw at least 3 polygons that spin about their own centers
         //   - have each polygon spin at a different speed / direction
         
-        // translate to the origin
-        let newVertices0 = [
-            CG.Vector3(100, 0, 1),
-            CG.Vector3(0, 100, 1),
-            CG.Vector3(-100, 0, 1),
-            CG.Vector3(0, -100, 1)
-        ];
         // rotate about the origin
-
-        
-        // translate back to the original location
-        
-
-
-
-
+        let newVertices1 = [];
+        for (let i=0; i<4; i++) {
+            let v = Matrix.multiply([this.models.slide1[0].rotate, this.models.slide1[0].verticesAtOrigin[i]]);
+            newVertices1.push(v);
+        }
+        this.models.slide1[0].verticesAtOrigin = newVertices1;
+        // translate to the desired location
+        let newVertices2 = [];
+        for (let i=0; i<4; i++) {
+            let v = Matrix.multiply([this.models.slide1[0].translate, newVertices1[i]]);
+            newVertices2.push(v);
+        }
         let color = [66, 158, 245, 255];
-        this.drawConvexPolygon(newVertices0, color);
-        
+        this.drawConvexPolygon(newVertices2, color);
+
+
+
+
+        // rotate about the origin
+        let newVertices3 = [];
+        for (let i=0; i<5; i++) {
+            let v = Matrix.multiply([this.models.slide1[1].rotate1, this.models.slide1[1].verticesAtOrigin[i]]);
+            newVertices3.push(v);
+        }
+        this.models.slide1[1].verticesAtOrigin = newVertices3;
+        // translate to the desired location
+        let newVertices4 = [];
+        for (let i=0; i<5; i++) {
+            let v = Matrix.multiply([this.models.slide1[1].translate1, newVertices3[i]]);
+            newVertices4.push(v);
+        }
+        let color1 = [157, 204, 29, 255];
+        this.drawConvexPolygon(newVertices4, color1);
+
+
+
+
+
+        // rotate about the origin
+        let newVertices5 = [];
+        for (let i=0; i<3; i++) {
+            let v = Matrix.multiply([this.models.slide1[2].rotate2, this.models.slide1[2].verticesAtOrigin[i]]);
+            newVertices5.push(v);
+        }
+        this.models.slide1[2].verticesAtOrigin = newVertices5;
+        // translate to the desired location
+        let newVertices6 = [];
+        for (let i=0; i<3; i++) {
+            let v = Matrix.multiply([this.models.slide1[2].translate2, newVertices5[i]]);
+            newVertices6.push(v);
+        }
+        let color2 = [229, 145, 255, 255];
+        this.drawConvexPolygon(newVertices6, color2);
     }
 
     //
@@ -230,7 +329,6 @@ class Renderer {
         // TODO: draw at least 2 polygons grow and shrink about their own centers
         //   - have each polygon grow / shrink different sizes
         //   - try at least 1 polygon that grows / shrinks non-uniformly in the x and y directions
-
 
     }
 
